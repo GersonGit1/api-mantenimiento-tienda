@@ -1,0 +1,25 @@
+{
+  "type": "module",
+  "name": "api_mantenimiento-tienda",
+  "version": "1.0.0",
+  "description": "esta api es para la app de mantenimiento de inventario de la empresa y para la app de la tienda en linea",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"nodemon ./index.js"
+  },
+  "author": "Giovanny Amaya",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "csurf": "^1.10.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "mysql2": "^3.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
