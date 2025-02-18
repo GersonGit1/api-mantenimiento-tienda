@@ -1,7 +1,10 @@
 import express from "express";
 import { CreateEmployee, DesactiveEmployee, ReadEmployees, UpdateContact, UpdateEmployeeUser } from "../controllers/EmployeesController.js";
 import ValidarIdExistente from "../middlewares/registroExiste.js";
+import verifySession from "../middlewares/verifySession.js";
 const router = express.Router();
+//proteger todas las rutas
+router.use(verifySession);
 
 router.get("/employees", ReadEmployees)
 router.post('/employees',CreateEmployee);
