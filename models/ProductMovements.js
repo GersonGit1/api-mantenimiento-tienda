@@ -1,24 +1,10 @@
 import pool from "../config/db.js";
 
- /**CREATE TABLE Product_movements(
-	id INT PRIMARY KEY AUTO_INCREMENT,
-    employee_id INT,
-    product_id INT,
-    movement_type ENUM('ENTRADA','SALIDA'), # este campo solo acepta los valores ENTRADA y SALIDA
-    product_movement_date DATETIME,
-    quantity INT,
-    reason VARCHAR(100),
-    FOREIGN KEY (employee_id) REFERENCES Employees(id),
-    FOREIGN KEY (product_id) REFERENCES Products(id)
-
-);
- */
-
-
 //validar que el emleado existe
 async function ValidarEmpleadoExistente(data) {
     const employee = await pool.query('SELECT id FROM Employees WHERE id = ?',[data.employee_id]);
-    return employee;
+    //retornamos el primer elemento del array porque es el que contiene los datos de la consulta
+    return employee[0];
 }
 
 async function ValidarStockSuficiente(data) {
@@ -26,30 +12,30 @@ async function ValidarStockSuficiente(data) {
     return stock;
 }
 //crear
-async function Create(data) {
+async function Create(data, id) {
     try {
-        //validar que el empleado existe
-        const employee = await ValidarEmpleadoExistente(data);
-        if (employee.length === 0) {
-            throw new Error("El empleado que intenta hacer la transacción no existe");
-        }
-        //validar que no salgan del stock más productos de los que tenemos disponibles
-        const stock = await ValidarStockSuficiente(data);
-        if (data.movement_type == 'SALIDA' && stock.length < data.quantity) {
-            throw new Error("Estock insuficiente para hacer esta transacción");
-        }
-        //registrar movimiento
-        let query ="INSERT INTO Products(employee_id, product_id, movement_type, product_movement_date, quantity, reason) VALUES (?, ?, ?, ?, ?, ?)";
         
-        await pool.query(query,data);
+        //registrar movimiento
+        let query ="INSERT INTO Product_movements(product_id, employee_id, movement_type, product_movement_date, quantity, reason) VALUES (?, ?, ?, ?, ?, ?)";
+        let datos = Object.values(data);
+        //agregar el id al inicio del array que se va a leer al pasar los argumentos de la consulta SQL
+        datos.unshift(id);
+        
+        const [movimiento] = await pool.query(query,datos);
         //actualizar stock
+        query = data.movement_type == 'SALIDA' ? "": ""
+        if (data.movement_type == 'SALIDA') {
+            query = "UPDATE Products SET stock = stock - ? WHERE id = ?";
+        } else if(data.movement_type == 'ENTRADA'){
+            query = "UPDATE Products SET stock = stock + ? WHERE id = ?";
+        }
+                
+        const [stockActualizado] = await pool.query(query,[data.quantity,id]);
 
-        query = data.movement_type == 'SALIDA' ? "UPDATE Products SET stock = stock - ? WHERE id = ?": "UPDATE Products SET stock = stock + ? WHERE id = ?"
-
-        await pool.query(query,[data.quantity,data.product_id]);
-
+        return [movimiento,stockActualizado,]
     } catch (error) {
         console.error(error);
+        return;
     }
 }
 //no tendremos una función para actualizar porque estos registros deben ser inmutables
@@ -57,7 +43,14 @@ async function Create(data) {
 //corrección directamente desde la base de datos
 
 //leer los registros
+async function Read() {
+    const [producto_movement] = await pool.query("SELECT id, employee_id, product_id, movement_type, product_movement_date, quantity, reason FROM Product_movements");
+    return producto_movement;
+}
 
 export{
-    Create
+    Create,
+    Read,
+    ValidarEmpleadoExistente,
+    ValidarStockSuficiente
 }
