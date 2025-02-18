@@ -1,4 +1,4 @@
-import { Create, Delete, Read, UpdateProfile, UpdateRole } from "../models/Users.js";
+import { Create, Delete, Login, Read, UpdateProfile, UpdateRole } from "../models/Users.js";
 
 
 async function CreateUser(req, res, next) {
@@ -103,10 +103,39 @@ async function DeleteUser(req,res,next) {
     }
 }
 
+async function AuthenticateUser(req,res,next) {
+    try {
+        const user = await Login(req.body);
+        //verificar si ha ingresado credenciales correctas
+        if (user.length === 0 || user[0].auth == false) {
+            res.status(401).json({error:"Usuario o contraseña incorrecto"});
+            return;
+        }
+
+        //verificar si la cuenta del usuario está activa
+        if(user[0].active_user == 0){
+            res.status(403).json({error:"La cuenta está inactiva"});
+            return;
+        }
+        
+        //si todo está bien procedemos a guardar la información del usuario en la sesion
+        req.session.user = {
+            id: user[0].id,
+            username: user[0].username,
+            role_id: user[0].role_id
+        }
+        res.json({mensaje:"Has iniciado sesión!"});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("error en el servidor");
+        next();
+    }
+}
 export{
     CreateUser,
     ReadUsers,
     UpdateUserProfile,
     UpdateUserRole,
-    DeleteUser
+    DeleteUser,
+    AuthenticateUser
 }
