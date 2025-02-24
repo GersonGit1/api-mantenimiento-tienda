@@ -107,6 +107,8 @@ async function AuthenticateUser(req,res,next) {
     try {
         const user = await Login(req.body);
         //verificar si ha ingresado credenciales correctas
+        console.log(req.body);
+        
         if (user.length === 0 || user[0].auth == false) {
             res.status(401).json({error:"Usuario o contraseña incorrecto"});
             return;
@@ -124,6 +126,12 @@ async function AuthenticateUser(req,res,next) {
             username: user[0].username,
             role_id: user[0].role_id
         }
+       //devolvemos la información de la sesión para que
+        /*const sesion = {
+            id: user[0].id,
+            username: user[0].username,
+            role_id: user[0].role_id
+        }*/
         res.json({mensaje:"Has iniciado sesión!"});
     } catch (error) {
         console.error(error);
