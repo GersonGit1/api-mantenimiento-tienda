@@ -16,7 +16,9 @@ async function Create(data) {
 
 //mostrar productos
 async function Read() {
-    const [products] = await pool.query("SELECT id, product_name, price, stock FROM Products WHERE active_product = 1");
+    const query ="SELECT p.id, p.product_name, p.price, p.stock, p.active_product, s.company_name "+
+                    "FROM Products p join Suppliers s on p.supplier_id = s.id";
+    const [products] = await pool.query(query);
     return products;
 }
 
@@ -28,7 +30,7 @@ async function UpdateInfo(data,id) {
 }
 
 //probar esta función hasta que esté listo el campo active_product en la bd
-async function Desactive(id) {
+async function UpdateState(id) {
     const data = [false,id];
     const [product] = await pool.query("UPDATE Products SET active_product = ? WHERE id = ?",data)
     return product;
@@ -38,5 +40,5 @@ export{
     Create,
     Read,
     UpdateInfo,
-    Desactive
+    UpdateState
 }

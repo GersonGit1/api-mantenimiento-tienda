@@ -27,6 +27,6 @@ router.get('/users/logout',(req,res)=>{
     });
 });
 //ruta de prueba para verificar la sesion
-//router.get('/users/verify-session');
+router.get('/users/verify-session',(req,res)=>{return res.status(200).json({mensaje:"estás autenticado, puedes continuar"});});
 
 export  {router};

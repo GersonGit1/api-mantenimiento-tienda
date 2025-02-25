@@ -46,17 +46,10 @@ async function Delete(id) {
     const [user] = await pool.query("DELETE FROM Users WHERE id = ?",id);
     return user;
 }
-/**CREATE TABLE Users(
-	id INT PRIMARY KEY AUTO_INCREMENT,
-    role_id INT,
-    username VARCHAR(50),
-    hashed_password VARCHAR(255),
-    active_user BOOLEAN NOT NULL DEFAULT TRUE,
-    FOREIGN KEY (role_id) REFERENCES Roles(id)
-); */
+
 async function Login(data) {
     const {username,password} = data;
-    const [user] = await pool.query('SELECT * FROM Users WHERE username = ?',[username]);
+    const [user] = await pool.query('SELECT * FROM Users WHERE BINARY username = ?',[username]);
     //verificar si el usuario existe, sino retornamos el array vacío y ya no ejecutamos el resto del código
     if(user.length === 0){
         return user;

@@ -1,5 +1,5 @@
 import { check, validationResult } from "express-validator";
-import { Create, Desactive, Read, UpdateInfo, ValidarIdExistente } from "../models/Products.js";
+import { Create, Read, UpdateInfo, UpdateState, ValidarIdExistente } from "../models/Products.js";
 
 async function CreateProducts(req, res, next) {
     try {
@@ -36,7 +36,7 @@ async function CreateProducts(req, res, next) {
 async function ReadProducts(req, res, next) {
     try {
         const productos = await Read();
-        res.json({mensaje:'Estos son los productos: ', productos});
+        res.status(200).json({mensaje:'Estos son los productos: ', productos});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
@@ -72,10 +72,10 @@ async function UpdateProductInfo(req, res, next) {
     }
 }
 
-async function DesactiveProduct(req,res,next) {
+async function ChangeState(req,res,next) {
     try {
         const id = req.params.id;
-        const resultado = await Desactive(id);
+        const resultado = await UpdateState(id);
         if(resultado.affectedRows === 0){
             res.status(404).json({mensaje:'No se encontró el producto a desactivar'});
         }
@@ -91,5 +91,5 @@ export {
     CreateProducts,
     ReadProducts,
     UpdateProductInfo,
-    DesactiveProduct
+    ChangeState
 }
