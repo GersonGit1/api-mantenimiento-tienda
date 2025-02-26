@@ -29,11 +29,30 @@ async function UpdateInfo(data,id) {
     return updatedProduct;
 }
 
-//probar esta función hasta que esté listo el campo active_product en la bd
-async function UpdateState(id) {
-    const data = [false,id];
-    const [product] = await pool.query("UPDATE Products SET active_product = ? WHERE id = ?",data)
-    return product;
+async function UpdateState(id,state) {
+    //si el estado viene como 0 significa que el producto está inactivo y el usuario quiero activarlo 
+    //por eso en la base de datos vamos a insertar true para que esté activo; de lo contrario insertamos false
+    //porque significa que el producto está activo y quieren desactivarlo
+    state == "0"? state = true: state = false;
+    const data = [state,id];
+    //realizar un transaction en mysql para actualizar el estado del producto y luego devolver el producto actualizado
+    const connection = await pool.getConnection(); //obtiene una conexión especial del pool de conexiones para poder ejecutar más de una
+                                                    //consulta dentro de la misma conexion
+    try {
+        await connection.beginTransaction(); //indicamos que las siguientes consultas estás dentro de una transacción              
+        await pool.query("UPDATE Products SET active_product = ? WHERE id = ?",data)
+        const [product] = await connection.query("SELECT * from Products WHERE id = ?",[id]);
+        await connection.commit();//confirmamos los cambios en la BD
+        console.log(product);
+    
+        return product;
+    } catch (error) {
+        await connection.rollback(); // rebertir cambios si hay error
+        console.log(error);
+    } finally {
+        connection.release(); //liberar la conexión
+    }
+
 }
 export{
     ValidarIdExistente,

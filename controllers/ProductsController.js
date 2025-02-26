@@ -75,11 +75,16 @@ async function UpdateProductInfo(req, res, next) {
 async function ChangeState(req,res,next) {
     try {
         const id = req.params.id;
-        const resultado = await UpdateState(id);
+        const state = req.body.state;
+        
+        const resultado = await UpdateState(id,state);
         if(resultado.affectedRows === 0){
-            res.status(404).json({mensaje:'No se encontró el producto a desactivar'});
+           return res.status(404).json({mensaje:'No se encontró el producto a desactivar'});
         }
-        res.json({mensaje:'Producto desactivado correctamente'});
+        // si el state viene como 0 significa que quieren poner a la venta el producto porque quieren cambiar su estado
+        //de 0 a 1. por eso si el código llega hasta aquí significa que el producto ya está como 1; o veceversa
+        const active = state == "0"? true:false;
+        return res.status(200).json({mensaje:'Estado modificado correctamente', active, resultado});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
