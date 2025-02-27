@@ -11,7 +11,12 @@ import { router as productMovementRouter } from "./routes/productMovements.js";
 const app = express();
 dotenv.config({path: ".env"});
 
-app.use(cors());//permite el ingreso de solicitudes desde un dominio distinto al de la api
+//permitir el ingreso de solicitudes desde un dominio distinto al de la api
+app.use(cors({
+    origin: "http://localhost:4000", //la api sólo acepta peticiones desde este dominio
+    credentials: true //permite el envío de cookies
+}));
+
 app.use(bodyParser.json());//permite interpretar los datos recibidos en formato json
 app.use(bodyParser.urlencoded({ extended: true }));//permite recibir y leer datos desde formularios html codificador en URL
 
