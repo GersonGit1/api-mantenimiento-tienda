@@ -34,9 +34,11 @@ async function CreateProducts(req, res, next) {
 }
 
 async function ReadProducts(req, res, next) {
+    //obtenemos el número de página que se está solicitando
+    const {pag} = req.query;
     try {
-        const productos = await Read();
-        res.status(200).json({mensaje:'Estos son los productos: ', productos});
+        const [productos,total] = await Read(pag);
+        res.status(200).json({mensaje:'Estos son los productos: ', productos, total});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");

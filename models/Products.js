@@ -15,11 +15,26 @@ async function Create(data) {
 }
 
 //mostrar productos
-async function Read() {
-    const query ="SELECT p.id, p.product_name, p.price, p.stock, p.active_product, s.company_name "+
-                    "FROM Products p join Suppliers s on p.supplier_id = s.id";
-    const [products] = await pool.query(query);
-    return products;
+async function Read(pagina) {
+    const connection = await pool.getConnection();
+    try {
+        //calculamos los registros que se va a saltar la consulta dependiendo de la página que se solicite
+        const registrosPorPagina = 10;
+        const offset = registrosPorPagina * (pagina - 1);
+        const query =`SELECT p.id, p.product_name, p.price, p.stock, p.active_product, s.company_name 
+                    FROM Products p join Suppliers s on p.supplier_id = s.id LIMIT 5 OFFSET ${offset}`;
+        const [products] = await pool.query(query);
+        const [total] = await pool.query("SELECT COUNT(*) as total FROM Products");
+        
+        return [products, total];
+    } catch (error) {
+        await connection.rollback(); // rebertir cambios si hay error
+        console.log(error);
+    }finally{
+        connection.release();
+    }
+
+    
 }
 
 async function UpdateInfo(data,id) {

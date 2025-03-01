@@ -106,9 +106,7 @@ async function DeleteUser(req,res,next) {
 async function AuthenticateUser(req,res,next) {
     try {
         const user = await Login(req.body);
-        //verificar si ha ingresado credenciales correctas
-        console.log(req.body);
-        
+        //verificar si ha ingresado credenciales correctas        
         if (user.length === 0 || user[0].auth == false) {
             res.status(401).json({error:"Usuario o contraseña incorrecto"});
             return;
