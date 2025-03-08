@@ -22,7 +22,7 @@ async function Read(pagina) {
         const registrosPorPagina = 10;
         const offset = registrosPorPagina * (pagina - 1);
         const query =`SELECT p.id, p.product_name, p.price, p.stock, p.active_product, s.company_name 
-                    FROM Products p join Suppliers s on p.supplier_id = s.id LIMIT 5 OFFSET ${offset}`;
+                    FROM Products p join Suppliers s on p.supplier_id = s.id LIMIT 10 OFFSET ${offset}`;
         const [products] = await pool.query(query);
         const [total] = await pool.query("SELECT COUNT(*) as total FROM Products");
         
