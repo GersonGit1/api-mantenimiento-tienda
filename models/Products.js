@@ -55,11 +55,9 @@ async function UpdateState(id,state) {
                                                     //consulta dentro de la misma conexion
     try {
         await connection.beginTransaction(); //indicamos que las siguientes consultas estás dentro de una transacción              
-        await pool.query("UPDATE Products SET active_product = ? WHERE id = ?",data)
+        await connection.query("UPDATE Products SET active_product = ? WHERE id = ?",data)
         const [product] = await connection.query("SELECT * from Products WHERE id = ?",[id]);
-        await connection.commit();//confirmamos los cambios en la BD
-        console.log(product);
-    
+        await connection.commit();//confirmamos los cambios en la BD    
         return product;
     } catch (error) {
         await connection.rollback(); // rebertir cambios si hay error

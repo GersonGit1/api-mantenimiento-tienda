@@ -18,8 +18,19 @@ async function Read() {
 async function UpdateSupplierContact(data,id) {
     let supplier = Object.values(data);
     supplier.push(id);
-    const [updatedSupplier] = await pool.query("UPDATE Suppliers SET phone_number = ?, email = ?, address = ? WHERE id = ?",supplier);
-    return updatedSupplier;
+    const connection = await pool.getConnection();//obtnemos una conexión del pool de conexiones y la usamos especialmente para la transacción siguiente
+    try {
+        await connection.beginTransaction();//iniciamos la transacción
+        await connection.query("UPDATE Suppliers SET phone_number = ?, email = ?, address = ? WHERE id = ?",supplier);
+        const [updatedSupplier] = await connection.query("SELECT * FROM Suppliers WHERE id = ?",id)
+        return updatedSupplier; 
+    } catch (error) {
+        await connection.rollback(); // rebertir cambios si hay error
+        console.log(error);
+    }finally{
+        connection.release();//liberamos la conexión
+    }
+    
 }
 
 //probar esta función hasta que esté listo el campo active_supplier en la bd

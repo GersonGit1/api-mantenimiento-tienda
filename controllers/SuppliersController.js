@@ -43,13 +43,16 @@ async function ReadSuppliers(req, res, next) {
 async function UpdateContact(req, res, next) {
     try {
         //verificar que los datos vengan correctamente
+        console.log(req.body);
+        
         await check('email').isEmail().withMessage('Debes ingresar tu email').run(req);
         await check('address').isLength({max:300}).withMessage('Tu dirección no puede tener más de 300 caracteres').run(req);
         //validamos los números de teléfono usando una expresión regular para aceptar números extrangeros
         await check('phone_number').matches(/^\+?[1-9]\d{1,14}$/).withMessage('El número de teléfono no tiene un formato válido').run(req);
 
         const errores = validationResult(req);
-
+        console.log(errores);
+        
         if(!errores.isEmpty()) {
             res.status(400).json({mensaje:'Petición con errores: ', errores});
             return;
@@ -58,10 +61,7 @@ async function UpdateContact(req, res, next) {
         //procesar la solicitud
         const id = req.params.id;
         const resultado = await UpdateSupplierContact(req.body, id);
-        if(resultado.affectedRows === 0){
-            res.status(404).json({mensaje:'No se encontró el proveedor a actualizar'});
-        }
-        res.json({mensaje:'Datos de contacto actualizados correctamente'});
+        res.json({mensaje:'Datos de contacto actualizados correctamente',resultado});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
