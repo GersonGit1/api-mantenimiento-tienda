@@ -51,11 +51,10 @@ async function UpdateContact(req, res, next) {
         await check('phone_number').matches(/^\+?[1-9]\d{1,14}$/).withMessage('El número de teléfono no tiene un formato válido').run(req);
 
         const errores = validationResult(req);
-        console.log(errores);
+        console.log(errores.errors);
         
         if(!errores.isEmpty()) {
-            res.status(400).json({mensaje:'Petición con errores: ', errores});
-            return;
+            return res.status(400).json({mensaje:'Petición con errores: ', errores});
         }
 
         //procesar la solicitud

@@ -9,6 +9,6 @@ router.use(verifySession);
 router.get("/suppliers", ReadSuppliers)
 router.post('/suppliers',CreateSupplier);
 router.put('/suppliers/update-contact/:id',ValidarIdExistente('Suppliers'), UpdateContact);
-router.put('/suppliers/desactive/:id',ValidarIdExistente('Suppliers'), DesactiveSupplier);
+router.delete('/suppliers/desactive/:id',ValidarIdExistente('Suppliers'), DesactiveSupplier);
 
 export { router };
