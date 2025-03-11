@@ -12,9 +12,26 @@ async function Create(data) {
 }
 
 //mostrar empleados
-async function Read() {
-    const [suppliers] = await pool.query("SELECT id, company_name, phone_number, email, address FROM Suppliers WHERE active_supplier = 1");
-    return suppliers;
+async function Read(pagina) {
+    //obtnemos una conexión especial para hacer la transacción
+    const connection = await pool.getConnection();
+    try {
+        
+        //calcular los registros que se va a saltar
+        const registrosPorPagina = 10;
+        const offset = registrosPorPagina * (pagina - 1);
+        //iniciamos la transacción      
+        await connection.beginTransaction();
+        const query = `SELECT id, company_name, phone_number, email, address 
+                    FROM Suppliers WHERE active_supplier = 1 LIMIT ${registrosPorPagina} OFFSET ${offset}`;
+        const [suppliers] = await connection.query(query);
+        const [total] = await connection.query("SELECT COUNT(*) as total FROM Suppliers");
+        return [suppliers,total];
+    } catch (error) {
+       await connection.rollback(); // rebertir cambios si hay error
+    }finally{
+        connection.release(); //liberar la conexión al finalizar todo incluso si hubo error
+    }
 }
 
 //actualizar el contacto del proveedor

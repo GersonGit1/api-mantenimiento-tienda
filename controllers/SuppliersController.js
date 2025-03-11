@@ -33,8 +33,10 @@ async function CreateSupplier(req, res, next) {
 
 async function ReadSuppliers(req, res, next) {
     try {
-        const suppliers = await Read();
-        res.json({mensaje:'Estos son los proveedores: ', suppliers});
+        //obtenemos el número de página que se está solicitando
+        const {pag} = req.query;
+        const [suppliers,total] = await Read(pag);
+        res.json({mensaje:'Estos son los proveedores: ', suppliers,total});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
