@@ -124,12 +124,6 @@ async function AuthenticateUser(req,res,next) {
             username: user[0].username,
             role_id: user[0].role_id
         }
-       //devolvemos la información de la sesión para que
-        /*const sesion = {
-            id: user[0].id,
-            username: user[0].username,
-            role_id: user[0].role_id
-        }*/
         res.json({mensaje:"Has iniciado sesión!"});
     } catch (error) {
         console.error(error);

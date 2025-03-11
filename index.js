@@ -26,7 +26,7 @@ app.use(session({
     resave: false,//evita que la sesion se guarde si no se modifica
     saveUninitialized: false,//no guarda sesiones nuevas sin inicializar
     cookie:{
-        maxAge: 1000 * 60 * 60,//1 hora
+        maxAge: 1000 * 60 * 5,//5 minutos
         httpOnly: true,//la cookie no puede ser accedida desde el cliente
         secure: false,//cuando usemos https cambiamos este valor a true
     }

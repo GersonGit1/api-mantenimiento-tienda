@@ -3,7 +3,7 @@ import { Create, Read, UpdateSupplierContact, Desactive } from "../models/Suppli
 
 
 async function CreateSupplier(req, res, next) {
-    try {
+    try {        
         //verificar que los datos vengan correctamente
         await check('email').isEmail().withMessage('Debes ingresar tu email').run(req);
         await check('address').isLength({max:300}).withMessage('Tu dirección no puede tener más de 300 caracteres').run(req);
@@ -20,8 +20,10 @@ async function CreateSupplier(req, res, next) {
 
 
         const datos = Object.values(req.body);
-        await Create(datos); 
-        res.json({mensaje:'inserción correcta'});
+        const supplier = await Create(datos); 
+        console.log(supplier);
+        
+        res.json({mensaje:'inserción correcta', supplier});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
@@ -31,8 +33,8 @@ async function CreateSupplier(req, res, next) {
 
 async function ReadSuppliers(req, res, next) {
     try {
-        const proveedores = await Read();
-        res.json({mensaje:'Estos son los proveedores: ', proveedores});
+        const suppliers = await Read();
+        res.json({mensaje:'Estos son los proveedores: ', suppliers});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
@@ -43,16 +45,12 @@ async function ReadSuppliers(req, res, next) {
 async function UpdateContact(req, res, next) {
     try {
         //verificar que los datos vengan correctamente
-        console.log(req.body);
-        
         await check('email').isEmail().withMessage('Debes ingresar tu email').run(req);
         await check('address').isLength({max:300}).withMessage('Tu dirección no puede tener más de 300 caracteres').run(req);
         //validamos los números de teléfono usando una expresión regular para aceptar números extrangeros
         await check('phone_number').matches(/^\+?[1-9]\d{1,14}$/).withMessage('El número de teléfono no tiene un formato válido').run(req);
 
-        const errores = validationResult(req);
-        console.log(errores.errors);
-        
+        const errores = validationResult(req);        
         if(!errores.isEmpty()) {
             return res.status(400).json({mensaje:'Petición con errores: ', errores});
         }
@@ -62,7 +60,6 @@ async function UpdateContact(req, res, next) {
         const resultado = await UpdateSupplierContact(req.body, id);
         res.json({mensaje:'Datos de contacto actualizados correctamente',resultado});
     } catch (error) {
-        console.error(error);
         res.status(500).send("error en el servidor");
         next(error);
     }

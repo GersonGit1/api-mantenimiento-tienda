@@ -3,9 +3,12 @@ import pool from "../config/db.js";
 //añadir proveedores
 async function Create(data) {
 
-    let query ="INSERT INTO Suppliers(company_name, phone_number, email, address) VALUES (?, ?, ?, ?)";
-    const [supplier]= await pool.query(query,data);
-    console.log(`Se ha insertado ${supplier}`);
+    //ejecutamos un procedimiendo almacenado de la base de datos
+    let query ="CALL insert_and_select_supplier(?, ?, ?, ?)";
+    const [supplier] = await pool.query(query,data); //insertamos al nuevo proveedor y recibimos el registro recién insertado
+    const sup = supplier[0];
+    //devolver únicamente el objeto con la información del registro recién agregado
+    return sup[0];
 }
 
 //mostrar empleados
