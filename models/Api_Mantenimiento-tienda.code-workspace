@@ -4,13 +4,7 @@
 			"path": ".."
 		},
 		{
-			"path": "../../BienesRaicesMVC"
-		},
-		{
 			"path": "../../front-end"
-		},
-		{
-			"path": "../../Curso Front-End/1-Ecommerse"
 		}
 	],
 	"settings": {}
