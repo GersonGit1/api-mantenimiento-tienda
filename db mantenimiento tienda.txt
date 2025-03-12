@@ -1,0 +1,128 @@
+CREATE DATABASE store_maintenance;
+USE store_maintenance;
+
+CREATE TABLE Roles(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    role_name VARCHAR(20)
+);
+
+CREATE TABLE Users(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    role_id INT,
+    username VARCHAR(50),
+    hashed_password VARCHAR(255),
+    active_user BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (role_id) REFERENCES Roles(id)
+);
+
+CREATE TABLE Employees(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    employee_name VARCHAR(50),
+    employee_lastname VARCHAR(50),
+	phone_number VARCHAR(15),
+    email VARCHAR(40),
+    address VARCHAR(300),
+    active_employee BOOLEAN NOT NULL DEFAULT TRUE,
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+CREATE TABLE Suppliers(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    company_name VARCHAR(50),
+	phone_number VARCHAR(15),
+    email VARCHAR(40),
+    address VARCHAR(300),
+    active_supplier BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE Products(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    supplier_id INT,
+    product_name VARCHAR(40),
+    price DECIMAL(10,2), # máximo 10 dígitos y mínimo 2 decimales
+    stock INT,
+    active_product BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(id)
+);
+
+CREATE TABLE Product_movements(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    product_id INT,
+    movement_type ENUM('ENTRADA','SALIDA'), # este campo solo acepta los valores ENTRADA y SALIDA
+    product_movement_date DATETIME,
+    quantity INT,
+    reason VARCHAR(100),
+    FOREIGN KEY (employee_id) REFERENCES Employees(id),
+    FOREIGN KEY (product_id) REFERENCES Products(id)
+);
+
+CREATE TABLE Customers(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    customer_name VARCHAR(50),
+    customer_lastname VARCHAR(50),
+    phone_number VARCHAR(20),
+    email VARCHAR(40),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+CREATE TABLE Purchases(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    purchase_date DATETIME,
+    address VARCHAR(50), #dirección de envío
+    FOREIGN KEY (customer_id) REFERENCES Customers(id)
+);
+
+CREATE TABLE Purchases_Details(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    purchase_id INT,
+    product_id INT,
+    quantity INT,
+    unit_price DECIMAL(10,2), #precio del producto al momento de la venta
+    FOREIGN KEY (purchase_id) REFERENCES Purchases(id),
+	FOREIGN KEY (product_id) REFERENCES Products(id)
+);
+
+INSERT INTO Roles(role_name) VALUES('Admin'),('Employee'),('Client');
+
+-- procedimiento almacenado para insertar proveedores y devolver el proveedor insertado
+
+DELIMITER //
+CREATE PROCEDURE insert_and_select_supplier(IN company_name VARCHAR(50), IN phone_number VARCHAR(15), IN email VARCHAR(40),IN address VARCHAR(300))
+BEGIN
+    DECLARE id_insertado INT;
+
+    -- Insertar el nuevo registro
+    INSERT INTO Suppliers (company_name, phone_number,email,address) VALUES (company_name, phone_number,email,address);
+
+    -- Obtener el ID del registro insertado
+    SET id_insertado = LAST_INSERT_ID();
+
+    -- Seleccionar los datos completos del registro
+    SELECT * FROM Suppliers WHERE id = id_insertado;
+END //
+DELIMITER ;
+
+---------------------------------LLENANDO TABLAS----------------------------
+
+INSERT INTO Suppliers (company_name, phone_number, email, address, active_supplier) VALUES
+('Electrodomésticos Rodríguez', '222-111-3333', 'ventas@electrodomesticosr.com', 'Calle Principal #123, Ciudad Central', 1),
+('Suministros García', '555-999-8888', 'info@suministrosgarcia.net', 'Avenida Norte #456, Distrito Industrial', 1),
+('Distribuidora López', '333-444-5555', 'contacto@distribuidoralopez.com.mx', 'Carrera Este #789, Zona Comercial', 0),
+('Tecnología Pérez', '777-666-2222', 'pedidos@tecnologiaperez.com', 'Diagonal Sur #101, Parque Tecnológico', 1),
+('Materiales Martínez', '999-888-1111', 'cotizaciones@materialesmartinez.org', 'Transversal Oeste #202, Barrio Artesanal', 1);
+
+INSERT INTO Products (supplier_id, product_name, price, stock, active_product) VALUES
+(3, 'Lavadora Automática', 399.99, 50, 1), (3, 'Refrigerador No Frost', 549.50, 30, 1), (3, 'Horno Microondas', 89.75, 100, 0), (3, 'Aspiradora Ciclónica', 129.00, 20, 1), (3, 'Licuadora Multifunción', 49.25, 75, 1),
+(4, 'Tornillos de Acero Inoxidable', 5.50, 500, 1), (4, 'Tuercas Autoblocantes', 3.75, 300, 1), (4, 'Arandelas Planas', 1.00, 1000, 0), (4, 'Brocas de Metal Duro', 8.50, 100, 1), (4, 'Cables Eléctricos', 15.99, 200, 1),
+(5, 'Laptop Ultrabook', 899.00, 25, 1), (5, 'Smartphone Android', 449.25, 40, 1), (5, 'Tablet 10 Pulgadas', 199.50, 60, 0), (5, 'Impresora Multifuncional', 149.00, 15, 1), (5, 'Router Inalámbrico', 79.50, 30, 1),
+(6, 'Ladrillos de Construcción', 2.75, 1000, 1), (6, 'Cemento Portland', 9.50, 500, 1), (6, 'Varillas de Acero', 12.50, 200, 0), (6, 'Tuberías de PVC', 6.00, 300, 1), (6, 'Pintura de Interior', 25.00, 100, 1),
+(7, 'Tela de Algodón', 7.00, 800, 1), (7, 'Hilo de Coser', 2.25, 1000, 1), (7, 'Botones de Colores', 0.50, 2000, 0), (7, 'Cremalleras Metálicas', 3.50, 500, 1), (7, 'Agujas de Tejer', 4.75, 300, 1),
+(3, 'Batidora de Mano', 29.99, 60, 1), (3, 'Cafetera Eléctrica', 34.50, 45, 1), (3, 'Tostadora de Pan', 19.00, 120, 0), (3, 'Olla de Cocción Lenta', 59.00, 25, 1), (3, 'Exprimidor de Cítricos', 24.00, 80, 1),
+(4, 'Clavos de Acero', 1.50, 1500, 1), (4, 'Remaches Pop', 2.75, 800, 1), (4, 'Cintas Adhesivas', 3.00, 1200, 0), (4, 'Discos de Corte', 6.50, 200, 1), (4, 'Guantes de Seguridad', 9.00, 400, 1),
+(5, 'Monitor LED 24 Pulgadas', 199.00, 35, 1), (5, 'Teclado Inalámbrico', 39.00, 50, 1), (5, 'Mouse Óptico', 19.50, 80, 0), (5, 'Audífonos Bluetooth', 59.00, 20, 1), (5, 'Memoria USB 64GB', 29.50, 60, 1),
+(6, 'Bloques de Hormigón', 1.25, 2000, 1), (6, 'Mortero de Albañilería', 7.50, 600, 1), (6, 'Tubos de Cobre', 18.00, 150, 0), (6, 'Barniz para Madera', 35.00, 80, 1), (6, 'Cerraduras de Seguridad', 15.00, 200, 1),
+(7, 'Hilos de Lana', 8.00, 900, 1), (7, 'Cintas de Encaje', 3.25, 1200, 1), (7, 'Lentejuelas Decorativas', 1.00, 2500, 0), (7, 'Tijeras de Costura', 5.50, 600, 1), (7, 'Patrones de Costura', 6.75, 400, 1);
