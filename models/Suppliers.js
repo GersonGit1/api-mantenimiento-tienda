@@ -25,7 +25,7 @@ async function Read(pagina) {
         const query = `SELECT id, company_name, phone_number, email, address 
                     FROM Suppliers WHERE active_supplier = 1 LIMIT ${registrosPorPagina} OFFSET ${offset}`;
         const [suppliers] = await connection.query(query);
-        const [total] = await connection.query("SELECT COUNT(*) as total FROM Suppliers");
+        const [total] = await connection.query("SELECT COUNT(*) as total FROM Suppliers WHERE active_supplier = 1");
         return [suppliers,total];
     } catch (error) {
        await connection.rollback(); // rebertir cambios si hay error
