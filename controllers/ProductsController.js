@@ -37,8 +37,8 @@ async function ReadProducts(req, res, next) {
     //obtenemos el número de página que se está solicitando
     const {pag} = req.query;
     try {
-        const [registros,total] = await Read(pag);
-        res.status(200).json({mensaje:'Estos son los productos: ', registros, total});
+        const [registros,total, proveedores] = await Read(pag);
+        res.status(200).json({mensaje:'Estos son los productos: ', registros, total, proveedores});
     } catch (error) {
         console.error(error);
         res.status(500).send("error en el servidor");
